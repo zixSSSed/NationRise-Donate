@@ -411,8 +411,20 @@ const LOGO=`<svg class="logo" viewBox="0 0 1400 1400" fill="currentColor" stroke
 /* ============================================================
    НАСТРОЙКИ
    ============================================================ */
-const CONFIG={ PAY_ENDPOINT:"/api/pay", IP:"mc.nationrise.space",
-  STATUS_API:"https://api.mcstatus.io/v2/status/java/mc.nationrise.space" };
+const CONFIG={
+  IP:"mc.nationrise.space",
+  STATUS_API:"https://api.mcstatus.io/v2/status/java/mc.nationrise.space",
+  // Основная площадка (Cloudflare Pages) — там живёт серверная функция оплаты.
+  MAIN_HOST:"nationrise.space",
+  // Зеркало на GitHub Pages статично, поэтому оплату оно запрашивает у основного домена.
+  get PAY_ENDPOINT(){
+    return location.hostname===this.MAIN_HOST||location.hostname==="www."+this.MAIN_HOST
+      ? "/api/pay" : "https://"+this.MAIN_HOST+"/api/pay";
+  },
+  // Запасной путь оплаты, если основной домен недоступен: витрина EasyDonate
+  // (российский домен, доступен когда наш сайт — нет).
+  SHOP_FALLBACK_URL:"https://nationrise.easydonate.ru",
+};
 
 /* ============================================================
    ИКОНКИ (SVG, не эмодзи) — заглушка, пока нет картинок товаров
@@ -436,6 +448,11 @@ const ICONS={
   shovel:`<path d="M6 19 13.5 11.5" ${S} stroke-width="1.9"/><path d="M14 6.5h5v5" ${S} stroke-width="1.7"/><path d="M12.6 12.9c1.4-2.4 3.6-4.2 6.4-5-0.8 2.8-2.6 5-5 6.4Z" ${S} stroke-width="1.4"/>`,
   crown:`<path d="M4 8l3.2 2.4L12 4l4.8 6.4L20 8l-1.6 10H5.6z" ${S} stroke-width="1.7"/><path d="M5.6 18h12.8" stroke="currentColor" stroke-width="1.7"/>`,
   shield:`<path d="M12 3l7 2.6v5.2c0 4.6-3 7.6-7 9.2-4-1.6-7-4.6-7-9.2V5.6z" ${S} stroke-width="1.7"/>`,
+  unlock:`<rect x="5" y="11" width="14" height="9.5" rx="1.6" ${S} stroke-width="1.7"/><path d="M8.5 11V7.6A3.5 3.5 0 0 1 15.4 7" ${S} stroke-width="1.7"/><circle cx="12" cy="15.6" r="1.5" fill="currentColor"/>`,
+  speak:`<path d="M4.5 5.5h15v10h-9l-4.5 3.5v-3.5h-1.5z" ${S} stroke-width="1.7"/><path d="M8.5 10.5h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
+  bot:`<rect x="5" y="8" width="14" height="11" rx="2.4" ${S} stroke-width="1.7"/><path d="M12 8V4.5M9.5 3.2h5" ${S} stroke-width="1.6"/><circle cx="9.3" cy="12.6" r="1.3" fill="currentColor"/><circle cx="14.7" cy="12.6" r="1.3" fill="currentColor"/><path d="M9.5 16.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
+  skin:`<path d="M8 4.5h8l1.5 4-2.5 1v10H9v-10l-2.5-1z" ${S} stroke-width="1.7"/><path d="M9.8 9.6h4.4" stroke="currentColor" stroke-width="1.4"/>`,
+  crate:`<path d="M4 9.5h16v9.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" ${S} stroke-width="1.7"/><path d="M4 9.5 6 5h12l2 4.5" ${S} stroke-width="1.7"/><path d="M12 5v4.5M4 13.5h16" stroke="currentColor" stroke-width="1.4"/><rect x="10.4" y="12" width="3.2" height="3.6" rx=".6" fill="currentColor"/>`,
   chev:`<path d="M9 5l7 7-7 7" ${S} stroke-width="2"/>`,
   check:`<path d="M4.5 12.5l5 5 10-11" ${S} stroke-width="2.2"/>`
 };
@@ -449,56 +466,72 @@ function crest(color,label){const id="c"+label.length+color.replace('#','');retu
    ============================================================ */
 const CATEGORIES=[
   {id:"all",name:"Всё"},{id:"priv",name:"Привилегии"},{id:"kit",name:"Наборы"},
-  {id:"res",name:"Ресурсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
-  {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
+  {id:"crate",name:"Кейсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
+  {id:"minion",name:"Миньоны"},
+  {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"pardon",name:"Снятие наказаний"},
+  {id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
 ];
 const DURS=[{v:"30",l:"30 дней"},{v:"90",l:"90 дней"},{v:"forever",l:"Навсегда"}];
 
 // Ранги по порядку (Дворянин → … → Custom). Цены-заглушки — потом подкорректируем.
 const PRODUCTS=[
-  {id:"nobleman",cat:"priv",icon:"crown",name:"Дворянин",tier:1,desc:"Префикс в чате, свой ранговый набор, наборы строителя и фермера.",variants:{"30":79,"90":179,"forever":249},ed:{}},
-  {id:"prince",  cat:"priv",icon:"crown",name:"Принц",   tier:2,desc:"Наборы шахтёра и рыбака, +1 слот на аукционе, команда /afk.",variants:{"30":129,"90":289,"forever":399},ed:{}},
-  {id:"elite",   cat:"priv",icon:"crown",name:"Элита",   tier:3,desc:"Набор бойца, +2 слота на аукционе, команды /feed и /clear.",variants:{"30":219,"90":479,"forever":699},ed:{}},
-  {id:"king",    cat:"priv",icon:"crown",name:"Король",  tier:4,desc:"Первые 2 точки дома, эндер-сундук /ec, набор охотника, +5 слотов.",variants:{"30":349,"90":749,"forever":1099},ed:{}},
-  {id:"archont", cat:"priv",icon:"crown",name:"Архонт",  tier:5,desc:"Полёт в своём городе, все 7 наборов профессий, 5 домов, чат без задержки.",variants:{"30":599,"90":1299,"forever":1899},ed:{}},
-  {id:"oktavian",cat:"priv",icon:"crown",name:"Октавиан",tier:6,hot:true,desc:"Полёт в землях нации, рюкзак на 45 слотов, 10 домов, −20% на постройки.",variants:{"30":1249,"90":2699,"forever":3699},ed:{}},
-  {id:"custom",  cat:"priv",icon:"crown",name:"Custom",  tier:7,desc:"Своя привилегия: название на выбор, 15 домов, 30 слотов аукциона, бесплатный разбан.",variants:{"30":1699,"90":3199,"forever":4199},ed:{}},
+  {id:"nobleman",cat:"priv",icon:"crown",name:"Дворянин",tier:1,desc:"Префикс в чате, свой ранговый набор, наборы строителя и фермера.",variants:{"30":79,"90":179,"forever":249},ed:{"30":1106893,"90":1106894,"forever":1106895}},
+  {id:"prince",  cat:"priv",icon:"crown",name:"Принц",   tier:2,desc:"Наборы шахтёра и рыбака, +1 слот на аукционе, команда /afk.",variants:{"30":129,"90":289,"forever":399},ed:{"30":1106896,"90":1106897,"forever":1106898}},
+  {id:"elite",   cat:"priv",icon:"crown",name:"Элита",   tier:3,desc:"Набор бойца, +2 слота на аукционе, команды /feed и /clear.",variants:{"30":219,"90":479,"forever":699},ed:{"30":1106899,"90":1106900,"forever":1106901}},
+  {id:"king",    cat:"priv",icon:"crown",name:"Король",  tier:4,desc:"Первые 2 точки дома, эндер-сундук /ec, набор охотника, +5 слотов.",variants:{"30":349,"90":749,"forever":1099},ed:{"30":1106902,"90":1106903,"forever":1106904}},
+  {id:"archont", cat:"priv",icon:"crown",name:"Архонт",  tier:5,desc:"Полёт в своём городе, все 7 наборов профессий, 5 домов, чат без задержки.",variants:{"30":599,"90":1299,"forever":1899},ed:{"30":1106905,"90":1106906,"forever":1106907}},
+  {id:"oktavian",cat:"priv",icon:"crown",name:"Октавиан",tier:6,hot:true,desc:"Полёт в землях нации, рюкзак на 45 слотов, 10 домов, −20% на постройки.",variants:{"30":1249,"90":2699,"forever":3699},ed:{"30":1106908,"90":1106909,"forever":1106910}},
+  {id:"custom",  cat:"priv",icon:"crown",name:"Custom",  tier:7,desc:"Своя привилегия: название на выбор, 15 домов, 30 слотов аукциона, бесплатный разбан.",variants:{"30":1699,"90":3199,"forever":4199},ed:{"30":1106911,"90":1106912,"forever":1106913}},
 
-  {id:"kit_builder",  cat:"kit",icon:"shield",name:"Набор строителя",  price:89,desc:"Блоки, инструменты Efficiency, леса, еда.",edId:null},
-  {id:"kit_farmer",   cat:"kit",icon:"shield",name:"Набор фермера",    price:89,desc:"Семена, костная мука, тяпка Fortune, вёдра.",edId:null},
-  {id:"kit_miner",    cat:"kit",icon:"shield",name:"Набор шахтёра",    price:89,desc:"Кирка Fortune, факелы, лестницы, провизия.",edId:null},
-  {id:"kit_fisher",   cat:"kit",icon:"shield",name:"Набор рыбака",     price:89,desc:"Удочка Lure III, лодка, бочки, рыба.",edId:null},
-  {id:"kit_pvp",      cat:"kit",icon:"shield",name:"Набор бойца",      price:89,desc:"Зачарованный меч, щит, лук, зелья.",edId:null},
-  {id:"kit_hunter",   cat:"kit",icon:"shield",name:"Набор охотника",   price:89,desc:"Лук Power, стрелы, зелья, припасы.",edId:null},
-  {id:"kit_alchemist",cat:"kit",icon:"shield",name:"Набор алхимика",   price:89,desc:"Варочная стойка, ингредиенты, зелья.",edId:null},
+  {id:"kit_builder",  cat:"kit",icon:"shield",name:"Набор строителя",  price:89,desc:"Блоки, инструменты Efficiency, леса, еда.",edId:1106914},
+  {id:"kit_farmer",   cat:"kit",icon:"shield",name:"Набор фермера",    price:89,desc:"Семена, костная мука, тяпка Fortune, вёдра.",edId:1106915},
+  {id:"kit_miner",    cat:"kit",icon:"shield",name:"Набор шахтёра",    price:89,desc:"Кирка Fortune, факелы, лестницы, провизия.",edId:1106916},
+  {id:"kit_fisher",   cat:"kit",icon:"shield",name:"Набор рыбака",     price:89,desc:"Удочка Lure III, лодка, бочки, рыба.",edId:1106917},
+  {id:"kit_pvp",      cat:"kit",icon:"shield",name:"Набор бойца",      price:89,desc:"Зачарованный меч, щит, лук, зелья.",edId:1106918},
+  {id:"kit_hunter",   cat:"kit",icon:"shield",name:"Набор охотника",   price:89,desc:"Лук Power, стрелы, зелья, припасы.",edId:1106919},
+  {id:"kit_alchemist",cat:"kit",icon:"shield",name:"Набор алхимика",   price:89,desc:"Варочная стойка, ингредиенты, зелья.",edId:1106920},
 
-  {id:"res_iron",     cat:"res",icon:"gem",name:"Набор железа",   price:49, desc:"Стак железа в игровой инвентарь.",edId:null},
-  {id:"res_diamond",  cat:"res",icon:"gem",name:"Набор алмазов",  price:149,desc:"Алмазы для крафта и торговли.",edId:null},
-  {id:"res_netherite",cat:"res",icon:"gem",name:"Набор незерита", price:399,desc:"Слитки незерита — топовая броня и инструменты.",edId:null},
 
-  {id:"spawner_zombie",  cat:"spawner",icon:"cage",name:"Спавнер зомби",  price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:null},
-  {id:"spawner_skeleton",cat:"spawner",icon:"cage",name:"Спавнер скелета",price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:null},
-  {id:"spawner_creeper", cat:"spawner",icon:"cage",name:"Спавнер крипера",price:249,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:null},
-  {id:"spawner_blaze",   cat:"spawner",icon:"cage",name:"Спавнер ифрита", price:349,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:null},
-  {id:"spawner_golem",   cat:"spawner",icon:"cage",name:"Спавнер голема", price:449,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:null},
+  {id:"crate_all",      cat:"crate",icon:"crate",name:"Кейс NationRise",   price:199,hot:true,desc:"Всё сразу: привилегии, райзики, монеты и предметы.",edId:1107059},
+  {id:"crate_privilege",cat:"crate",icon:"crate",name:"Кейс Привилегий",  price:299,desc:"Шанс выбить донат-привилегию.",edId:1107060},
+  {id:"crate_crystal",  cat:"crate",icon:"crate",name:"Кейс Райзиков",    price:149,desc:"Донат-валюта случайной суммой.",edId:1107061},
+  {id:"crate_money",    cat:"crate",icon:"crate",name:"Кейс Монет",       price:119,desc:"Игровые монеты случайной суммой.",edId:1107062},
+  {id:"crate_item",     cat:"crate",icon:"crate",name:"Кейс Предметов",   price:89, desc:"Ресурсы и полезные вещи для старта.",edId:1107063},
 
-  {id:"prom_pickaxe",cat:"prometheus",icon:"pickaxe",name:"Кирка Прометея",price:119,hot:true,desc:"Эффективность X. Рвёт камень в разы быстрее обычной.",edId:null},
-  {id:"prom_axe",    cat:"prometheus",icon:"axe",    name:"Топор Прометея",price:99,desc:"Эффективность X. Валит лес за секунды.",edId:null},
-  {id:"prom_shovel", cat:"prometheus",icon:"shovel", name:"Лопата Прометея",price:89,desc:"Эффективность X. Копает грунт молниеносно.",edId:null},
+  {id:"spawner_zombie",  cat:"spawner",icon:"cage",name:"Спавнер зомби",  price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106921},
+  {id:"spawner_skeleton",cat:"spawner",icon:"cage",name:"Спавнер скелета",price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106922},
+  {id:"spawner_creeper", cat:"spawner",icon:"cage",name:"Спавнер крипера",price:249,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106923},
+  {id:"spawner_blaze",   cat:"spawner",icon:"cage",name:"Спавнер ифрита", price:349,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106924},
+  {id:"spawner_golem",   cat:"spawner",icon:"cage",name:"Спавнер голема", price:349,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106925},
 
-  {id:"city_2",cat:"citylevel",icon:"castle",name:"Город → Уровень 2",price:299, desc:"Мгновенно поднять твой город до 2 уровня.",edId:null},
-  {id:"city_3",cat:"citylevel",icon:"castle",name:"Город → Уровень 3",price:599, desc:"Мгновенно поднять город до 3 уровня.",edId:null},
-  {id:"city_4",cat:"citylevel",icon:"castle",name:"Город → Уровень 4",price:999, desc:"Мгновенно поднять город до 4 уровня.",edId:null},
-  {id:"city_5",cat:"citylevel",icon:"castle",name:"Город → Уровень 5",price:1599,desc:"Мгновенно поднять город до 5 уровня.",edId:null},
-  {id:"city_6",cat:"citylevel",icon:"castle",name:"Город → Уровень 6",price:2499,desc:"Максимальный уровень города.",edId:null},
+  {id:"prom_pickaxe",cat:"prometheus",icon:"pickaxe",name:"Кирка Прометея",price:119,hot:true,desc:"Эффективность X. Рвёт камень в разы быстрее обычной.",edId:1106926},
+  {id:"prom_axe",    cat:"prometheus",icon:"axe",    name:"Топор Прометея",price:99,desc:"Эффективность X. Валит лес за секунды.",edId:1106927},
+  {id:"prom_shovel", cat:"prometheus",icon:"shovel", name:"Лопата Прометея",price:89,desc:"Эффективность X. Копает грунт молниеносно.",edId:1106928},
 
-  {id:"city_restore",cat:"restore",icon:"hammer",name:"Восстановление города",price:139,desc:"Вернуть разрушенный или удалённый город со всеми участками.",edId:null},
+  {id:"city_2",cat:"citylevel",icon:"castle",name:"Город → Уровень 2",price:299, desc:"Мгновенно поднять твой город до 2 уровня.",edId:1106929},
+  {id:"city_3",cat:"citylevel",icon:"castle",name:"Город → Уровень 3",price:599, desc:"Мгновенно поднять город до 3 уровня.",edId:1106930},
+  {id:"city_4",cat:"citylevel",icon:"castle",name:"Город → Уровень 4",price:999, desc:"Мгновенно поднять город до 4 уровня.",edId:1106931},
+  {id:"city_5",cat:"citylevel",icon:"castle",name:"Город → Уровень 5",price:1599,desc:"Мгновенно поднять город до 5 уровня.",edId:1106932},
+  {id:"city_6",cat:"citylevel",icon:"castle",name:"Город → Уровень 6",price:2499,desc:"Максимальный уровень города.",edId:1106933},
 
-  {id:"rise",cat:"rise",icon:"coin",name:"Райзики",custom:true,desc:"Донат-валюта. 1 райзик = 1 ₽. Введи нужное количество.",edId:null},
+  {id:"city_restore",cat:"restore",icon:"hammer",name:"Восстановление города",price:139,desc:"Вернуть разрушенный или удалённый город со всеми участками.",edId:1106934},
 
-  {id:"coins_100", cat:"coins",icon:"coin",name:"100 монет",  price:40, desc:"Игровая экономика сервера.",edId:null},
-  {id:"coins_500", cat:"coins",icon:"coin",name:"500 монет",  price:180,badge:"выгодно",desc:"Игровая экономика сервера.",edId:null},
-  {id:"coins_1000",cat:"coins",icon:"coin",name:"1000 монет", price:340,badge:"выгодно",desc:"Игровая экономика сервера.",edId:null},
+  {id:"minion_universal",cat:"minion",icon:"bot",name:"Универсальный миньон",price:119,hot:true,desc:"Работает с любым ресурсом, а не с одним.",edId:1107040},
+  {id:"skin_homeboby",cat:"minion",icon:"skin",name:"Скин миньона HomeBoby",price:59,desc:"Токен скина — можно надеть или продать.",edId:1107045},
+  {id:"skin_lelouch", cat:"minion",icon:"skin",name:"Скин миньона Lelouch", price:59,desc:"Токен скина — можно надеть или продать.",edId:1107046},
+  {id:"skin_cc",      cat:"minion",icon:"skin",name:"Скин миньона CC",      price:59,desc:"Токен скина — можно надеть или продать.",edId:1107047},
+  {id:"skin_nekmeng", cat:"minion",icon:"skin",name:"Скин миньона NekMeng", price:59,desc:"Токен скина — можно надеть или продать.",edId:1107048},
+  {id:"skin_minion",  cat:"minion",icon:"skin",name:"Скин миньона Миньон",  price:59,desc:"Токен скина — можно надеть или продать.",edId:1107049},
+  {id:"skin_pudge",   cat:"minion",icon:"skin",name:"Скин миньона Pudge",   price:59,desc:"Токен скина — можно надеть или продать.",edId:1107050},
+
+  {id:"unban", cat:"pardon",icon:"unlock",name:"Разбан",price:189,desc:"Снять блокировку и вернуться на сервер.",edId:1106935},
+  {id:"unmute",cat:"pardon",icon:"speak", name:"Размут",price:99, desc:"Снять запрет на общение в чате.",edId:1106936},
+
+  {id:"rise",cat:"rise",icon:"coin",name:"Райзики",custom:true,desc:"Донат-валюта. 1 райзик = 1 ₽. Введи нужное количество.",edId:1107044},
+
+  {id:"coins_100", cat:"coins",icon:"coin",name:"100 монет",  price:40, desc:"Игровая экономика сервера.",edId:1107051},
+  {id:"coins_500", cat:"coins",icon:"coin",name:"500 монет",  price:180,badge:"выгодно",desc:"Игровая экономика сервера.",edId:1107052},
+  {id:"coins_1000",cat:"coins",icon:"coin",name:"1000 монет", price:340,badge:"выгодно",desc:"Игровая экономика сервера.",edId:1107053},
 ];
 
 /* ============================================================
@@ -585,9 +618,9 @@ const DETAILS={
   kit_hunter:{sub:"Всё для охоты",perks:["Лук: Сила III, Прочность III","Запас стрел","Зелья и провизия"]},
   kit_alchemist:{sub:"Всё для зельеварения",perks:["Варочная стойка","Ингредиенты для зелий","Готовые зелья"]},
 
-  prom_pickaxe:{sub:"Топовая кирка сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
-  prom_axe:{sub:"Топовый топор сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
-  prom_shovel:{sub:"Топовая лопата сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
+  prom_pickaxe:{sub:"Топовая кирка сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
+  prom_axe:{sub:"Топовый топор сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
+  prom_shovel:{sub:"Топовая лопата сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
 
   city_2:{sub:"Второй уровень города",perks:[
     "§+8§ чанков к лимиту застройки города",
@@ -613,6 +646,39 @@ const DETAILS={
     "Особая иконка города на карте мира",
     "Не нужно собирать ресурсы и ждать — уровень выдаётся сразу"]},
 
+  crate_all:{sub:"Главный кейс сервера",perks:[
+    "Внутри может выпасть §что угодно§: привилегия, райзики, монеты или предметы",
+    "Открывается у стойки кейсов на спавне",
+    "Ключ приходит на аккаунт сразу после оплаты"]},
+  crate_privilege:{sub:"Кейс с донат-рангами",perks:[
+    "Шанс выбить любую привилегию — вплоть до §Октавиана§",
+    "Чем выше ранг, тем реже он выпадает",
+    "Открывается у стойки кейсов на спавне"]},
+  crate_crystal:{sub:"Кейс с донат-валютой",perks:[
+    "Райзики случайной суммой",
+    "Тратятся во внутриигровом магазине"]},
+  crate_money:{sub:"Кейс с игровыми монетами",perks:[
+    "Монеты случайной суммой",
+    "Пригодятся на аукционе и в торговле"]},
+  crate_item:{sub:"Кейс с ресурсами",perks:[
+    "Ресурсы и полезные вещи: руда, опыт, еда, обсидиан",
+    "Хороший старт для новичка"]},
+
+  unban:{sub:"Снятие блокировки",perks:[
+    "Блокировка снимается сразу после оплаты",
+    "Действует на §любой§ бан, включая выданные за читы",
+    "Заходить можно тем же аккаунтом",
+    "Прогресс, город и вещи остаются на месте",
+    "Повторное нарушение — новый бан, покупка его не отменяет"]},
+
+  minion_universal:{sub:"Миньон под любой ресурс",perks:[
+    "Обычный миньон умеет добывать один ресурс, универсальный — §любой§",
+    "Ставится в своём городе",
+    "Считается отдельно от лимита обычных миньонов"]},
+  unmute:{sub:"Снятие запрета на чат",perks:[
+    "Мут снимается сразу после оплаты",
+    "Возвращается доступ ко всем чатам сервера"]},
+
   city_restore:{sub:"Возврат потерянного города",perks:["Город восстанавливается со всеми участками","Возвращаются постройки и уровень","Казна и склад города остаются вашими"]},
   rise:{sub:"Донат-валюта сервера",perks:["1 райзик = 1 ₽","Тратится во внутриигровом магазине","Спавнеры, чары и предметы за райзики"]},
 };
@@ -635,7 +701,8 @@ function setCat(c){activeCat=c;renderTabs();renderGrid();}
 
 const RANK_STYLE={1:['#c07a3e','I'],2:['#9aa7b8','II'],3:['#e0a93c','III'],4:['#57b894','IV'],5:['#4f9de0','V'],6:['#a06ae0','VI'],7:['#e05a7a','★']};
 const KIT_ICON={kit_builder:['bricks','#e0954a'],kit_farmer:['wheat','#6cc06a'],kit_miner:['pickaxe','#aab4c3'],kit_fisher:['rod','#4fb8d8'],kit_pvp:['sword','#e0655a'],kit_hunter:['bow','#e0b64a'],kit_alchemist:['flask','#b06ae0']};
-const CAT_TINT={res:'#7fd0e0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',rise:'#f2cf7a',coins:'#d9c27a'};
+const CAT_TINT={crate:'#c88ce0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',
+  minion:'#e0c84a',pardon:'#6cc0a0',rise:'#f2cf7a',coins:'#d9c27a'};
 /* Иконка товара: сначала пробуем картинку img/<id>.png (просто положи файл — код править не нужно),
    если её нет — красиво падаем на векторную заглушку. */
 function fallbackArt(p){
@@ -768,16 +835,28 @@ async function pay(){
   if(!/^\S+@\S+\.\S+$/.test(email)){showMsg("Введите корректный Email.","err");return;}
   if(!agree){showMsg("Нужно принять условия.","err");return;}
   localStorage.setItem("nr_nick",nick);localStorage.setItem("nr_email",email);
-  const products={};let missing=false;
-  keys.forEach(k=>{const e=cart[k],p=P(e.pid);let edId=p.variants?(p.ed&&p.ed[e.variant]):p.edId;if(!edId){missing=true;}else products[edId]=(products[edId]||0)+e.qty;});
+  // EasyDonate ждёт массив [{id, quantity}], не более 10 разных позиций
+  const byId={};let missing=false;
+  keys.forEach(k=>{const e=cart[k],p=P(e.pid);const edId=p.variants?(p.ed&&p.ed[e.variant]):p.edId;
+    if(!edId){missing=true;}else byId[edId]=(byId[edId]||0)+e.qty;});
   if(missing){showMsg("Оплата этих товаров ещё настраивается (не привязаны ID EasyDonate). Скоро заработает.","info");return;}
+  const products=Object.entries(byId).map(([id,quantity])=>({id:Number(id),quantity}));
+  if(products.length>10){showMsg("В одном заказе не больше 10 разных товаров. Оформи покупку в два раза.","err");return;}
   const btn=document.getElementById("payBtn");btn.disabled=true;btn.textContent="Создаём платёж…";
   try{
     const r=await fetch(CONFIG.PAY_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer:nick,email,products,coupon:document.getElementById("promo").value.trim()})});
     const data=await r.json();
     if(data&&data.url){location.href=data.url;return;}
     showMsg(data&&data.error?data.error:"Не удалось создать платёж. Попробуй позже.","err");
-  }catch(e){showMsg("Оплата пока не подключена (нет прокси EasyDonate). См. инструкцию по настройке.","info");}
+  }catch(e){
+    // сюда попадаем, если основной домен недоступен (например, у провайдера)
+    if(CONFIG.SHOP_FALLBACK_URL){
+      const m=document.getElementById("msg");
+      m.className="msg info";
+      m.innerHTML='Основной сайт сейчас недоступен. Оплатить можно на нашей витрине: '+
+        '<a href="'+CONFIG.SHOP_FALLBACK_URL+'" target="_blank" rel="noopener"><b>перейти к оплате</b></a>';
+    } else showMsg("Оплата пока не подключена. Загляни чуть позже.","info");
+  }
   btn.disabled=false;btn.textContent="Оплатить";
 }
 
