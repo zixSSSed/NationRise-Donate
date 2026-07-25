@@ -452,6 +452,7 @@ const ICONS={
   speak:`<path d="M4.5 5.5h15v10h-9l-4.5 3.5v-3.5h-1.5z" ${S} stroke-width="1.7"/><path d="M8.5 10.5h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
   bot:`<rect x="5" y="8" width="14" height="11" rx="2.4" ${S} stroke-width="1.7"/><path d="M12 8V4.5M9.5 3.2h5" ${S} stroke-width="1.6"/><circle cx="9.3" cy="12.6" r="1.3" fill="currentColor"/><circle cx="14.7" cy="12.6" r="1.3" fill="currentColor"/><path d="M9.5 16.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
   skin:`<path d="M8 4.5h8l1.5 4-2.5 1v10H9v-10l-2.5-1z" ${S} stroke-width="1.7"/><path d="M9.8 9.6h4.4" stroke="currentColor" stroke-width="1.4"/>`,
+  crate:`<path d="M4 9.5h16v9.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" ${S} stroke-width="1.7"/><path d="M4 9.5 6 5h12l2 4.5" ${S} stroke-width="1.7"/><path d="M12 5v4.5M4 13.5h16" stroke="currentColor" stroke-width="1.4"/><rect x="10.4" y="12" width="3.2" height="3.6" rx=".6" fill="currentColor"/>`,
   chev:`<path d="M9 5l7 7-7 7" ${S} stroke-width="2"/>`,
   check:`<path d="M4.5 12.5l5 5 10-11" ${S} stroke-width="2.2"/>`
 };
@@ -465,7 +466,7 @@ function crest(color,label){const id="c"+label.length+color.replace('#','');retu
    ============================================================ */
 const CATEGORIES=[
   {id:"all",name:"Всё"},{id:"priv",name:"Привилегии"},{id:"kit",name:"Наборы"},
-  {id:"res",name:"Ресурсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
+  {id:"crate",name:"Кейсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
   {id:"minion",name:"Миньоны"},
   {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"pardon",name:"Снятие наказаний"},
   {id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
@@ -490,9 +491,12 @@ const PRODUCTS=[
   {id:"kit_hunter",   cat:"kit",icon:"shield",name:"Набор охотника",   price:89,desc:"Лук Power, стрелы, зелья, припасы.",edId:1106919},
   {id:"kit_alchemist",cat:"kit",icon:"shield",name:"Набор алхимика",   price:89,desc:"Варочная стойка, ингредиенты, зелья.",edId:1106920},
 
-  {id:"res_iron",     cat:"res",icon:"gem",name:"Набор железа",   price:49, desc:"Стак железа в игровой инвентарь.",edId:1107041},
-  {id:"res_diamond",  cat:"res",icon:"gem",name:"Набор алмазов",  price:149,desc:"Алмазы для крафта и торговли.",edId:1107042},
-  {id:"res_netherite",cat:"res",icon:"gem",name:"Набор незерита", price:399,desc:"Слитки незерита — топовая броня и инструменты.",edId:1107043},
+
+  {id:"crate_all",      cat:"crate",icon:"crate",name:"Кейс NationRise",   price:199,hot:true,desc:"Всё сразу: привилегии, райзики, монеты и предметы.",edId:1107059},
+  {id:"crate_privilege",cat:"crate",icon:"crate",name:"Кейс Привилегий",  price:299,desc:"Шанс выбить донат-привилегию.",edId:1107060},
+  {id:"crate_crystal",  cat:"crate",icon:"crate",name:"Кейс Райзиков",    price:149,desc:"Донат-валюта случайной суммой.",edId:1107061},
+  {id:"crate_money",    cat:"crate",icon:"crate",name:"Кейс Монет",       price:119,desc:"Игровые монеты случайной суммой.",edId:1107062},
+  {id:"crate_item",     cat:"crate",icon:"crate",name:"Кейс Предметов",   price:89, desc:"Ресурсы и полезные вещи для старта.",edId:1107063},
 
   {id:"spawner_zombie",  cat:"spawner",icon:"cage",name:"Спавнер зомби",  price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106921},
   {id:"spawner_skeleton",cat:"spawner",icon:"cage",name:"Спавнер скелета",price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106922},
@@ -642,6 +646,24 @@ const DETAILS={
     "Особая иконка города на карте мира",
     "Не нужно собирать ресурсы и ждать — уровень выдаётся сразу"]},
 
+  crate_all:{sub:"Главный кейс сервера",perks:[
+    "Внутри может выпасть §что угодно§: привилегия, райзики, монеты или предметы",
+    "Открывается у стойки кейсов на спавне",
+    "Ключ приходит на аккаунт сразу после оплаты"]},
+  crate_privilege:{sub:"Кейс с донат-рангами",perks:[
+    "Шанс выбить любую привилегию — вплоть до §Октавиана§",
+    "Чем выше ранг, тем реже он выпадает",
+    "Открывается у стойки кейсов на спавне"]},
+  crate_crystal:{sub:"Кейс с донат-валютой",perks:[
+    "Райзики случайной суммой",
+    "Тратятся во внутриигровом магазине"]},
+  crate_money:{sub:"Кейс с игровыми монетами",perks:[
+    "Монеты случайной суммой",
+    "Пригодятся на аукционе и в торговле"]},
+  crate_item:{sub:"Кейс с ресурсами",perks:[
+    "Ресурсы и полезные вещи: руда, опыт, еда, обсидиан",
+    "Хороший старт для новичка"]},
+
   unban:{sub:"Снятие блокировки",perks:[
     "Блокировка снимается сразу после оплаты",
     "Действует на §любой§ бан, включая выданные за читы",
@@ -679,7 +701,7 @@ function setCat(c){activeCat=c;renderTabs();renderGrid();}
 
 const RANK_STYLE={1:['#c07a3e','I'],2:['#9aa7b8','II'],3:['#e0a93c','III'],4:['#57b894','IV'],5:['#4f9de0','V'],6:['#a06ae0','VI'],7:['#e05a7a','★']};
 const KIT_ICON={kit_builder:['bricks','#e0954a'],kit_farmer:['wheat','#6cc06a'],kit_miner:['pickaxe','#aab4c3'],kit_fisher:['rod','#4fb8d8'],kit_pvp:['sword','#e0655a'],kit_hunter:['bow','#e0b64a'],kit_alchemist:['flask','#b06ae0']};
-const CAT_TINT={res:'#7fd0e0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',
+const CAT_TINT={crate:'#c88ce0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',
   minion:'#e0c84a',pardon:'#6cc0a0',rise:'#f2cf7a',coins:'#d9c27a'};
 /* Иконка товара: сначала пробуем картинку img/<id>.png (просто положи файл — код править не нужно),
    если её нет — красиво падаем на векторную заглушку. */
