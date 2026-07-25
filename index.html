@@ -411,8 +411,21 @@ const LOGO=`<svg class="logo" viewBox="0 0 1400 1400" fill="currentColor" stroke
 /* ============================================================
    НАСТРОЙКИ
    ============================================================ */
-const CONFIG={ PAY_ENDPOINT:"/api/pay", IP:"mc.nationrise.space",
-  STATUS_API:"https://api.mcstatus.io/v2/status/java/mc.nationrise.space" };
+const CONFIG={
+  IP:"mc.nationrise.space",
+  STATUS_API:"https://api.mcstatus.io/v2/status/java/mc.nationrise.space",
+  // Основная площадка (Cloudflare Pages) — там живёт серверная функция оплаты.
+  MAIN_HOST:"nationrise.space",
+  // Зеркало на GitHub Pages статично, поэтому оплату оно запрашивает у основного домена.
+  get PAY_ENDPOINT(){
+    return location.hostname===this.MAIN_HOST||location.hostname==="www."+this.MAIN_HOST
+      ? "/api/pay" : "https://"+this.MAIN_HOST+"/api/pay";
+  },
+  // Запасной путь оплаты, если основной домен недоступен: витрина EasyDonate
+  // (российский домен). Заполнить после создания магазина, например
+  // "https://nationrise.easydonate.ru".
+  SHOP_FALLBACK_URL:"",
+};
 
 /* ============================================================
    ИКОНКИ (SVG, не эмодзи) — заглушка, пока нет картинок товаров
@@ -777,7 +790,15 @@ async function pay(){
     const data=await r.json();
     if(data&&data.url){location.href=data.url;return;}
     showMsg(data&&data.error?data.error:"Не удалось создать платёж. Попробуй позже.","err");
-  }catch(e){showMsg("Оплата пока не подключена (нет прокси EasyDonate). См. инструкцию по настройке.","info");}
+  }catch(e){
+    // сюда попадаем, если основной домен недоступен (например, у провайдера)
+    if(CONFIG.SHOP_FALLBACK_URL){
+      const m=document.getElementById("msg");
+      m.className="msg info";
+      m.innerHTML='Основной сайт сейчас недоступен. Оплатить можно на нашей витрине: '+
+        '<a href="'+CONFIG.SHOP_FALLBACK_URL+'" target="_blank" rel="noopener"><b>перейти к оплате</b></a>';
+    } else showMsg("Оплата пока не подключена. Загляни чуть позже.","info");
+  }
   btn.disabled=false;btn.textContent="Оплатить";
 }
 
