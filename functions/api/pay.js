@@ -65,9 +65,9 @@ export async function onRequestPost(context) {
   };
   if (coupon) payload.promocode = String(coupon);
 
-  let res, data;
+  let data;
   try {
-    res = await fetch(API, {
+    const res = await fetch(API, {
       method: "POST",
       headers: {
         "X-Shop-Key": env.SHOP_KEY,
@@ -78,16 +78,32 @@ export async function onRequestPost(context) {
     });
     data = await res.json();
   } catch (e) {
-    return j({ error: "EasyDonate недоступен, попробуйте позже." }, 502, ch);
+    // 200, а не 5xx: иначе Cloudflare подменит наш JSON своей страницей ошибки
+    return j({ error: "Платёжный сервис не отвечает. Попробуйте чуть позже." }, 200, ch);
   }
 
   if (data && data.success && data.data && data.data.url)
     return j({ url: data.data.url }, 200, ch);
 
-  // показываем причину отказа, если EasyDonate её прислал
-  const why = data && (data.message || data.error ||
-    (data.errors && JSON.stringify(data.errors)));
-  return j({ error: why ? "EasyDonate: " + why : "Не удалось создать платёж." }, 502, ch);
+  return j({ error: describe(data) }, 200, ch);
+}
+
+/** Понятный текст вместо технической ошибки EasyDonate. */
+function describe(data) {
+  const err = data && data.error;
+  const code = err && (err.code || err);
+  const raw = (err && err.message) || (data && data.message) || "";
+
+  const known = {
+    BANK_ACCOUNT_INACTIVE: "Приём платежей ещё не активирован владельцем магазина. Загляните позже.",
+    SHOP_NOT_FOUND: "Магазин не найден. Напишите администрации.",
+    PRODUCT_NOT_FOUND: "Один из товаров больше не продаётся — обновите страницу.",
+    SERVER_NOT_FOUND: "Сервер выдачи не настроен. Напишите администрации.",
+    VALIDATION_ERROR: "Проверьте ник и email.",
+  };
+  if (typeof code === "string" && known[code]) return known[code];
+  if (raw) return "Платёж не создан: " + raw;
+  return "Не удалось создать платёж. Попробуйте позже.";
 }
 
 function j(obj, status, extraHeaders) {

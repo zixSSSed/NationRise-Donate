@@ -20,6 +20,8 @@ import re
 import sys
 import urllib.request
 
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # в названиях есть «→» и кириллица
+
 API = "https://easydonate.ru/api/v3/shop/products"
 HTML = "index.html"
 
@@ -59,9 +61,9 @@ def base_and_dur(name):
 
 
 def site_products(html):
-    """Достаём из index.html id, name и признак «есть варианты сроков»."""
+    """Достаём из index.html только ТОВАРЫ (у них есть cat:), но не категории меню."""
     out = []
-    for m in re.finditer(r'\{id:"([^"]+)"[^\n]*?name:"([^"]+)"([^\n]*)', html):
+    for m in re.finditer(r'\{id:"([^"]+)",\s*cat:"[^"]+"[^\n]*?name:"([^"]+)"([^\n]*)', html):
         pid, name, rest = m.group(1), m.group(2), m.group(3)
         out.append({"pid": pid, "name": name, "variants": "variants:" in rest})
     return out
@@ -77,37 +79,69 @@ def main():
         sys.exit("В магазине EasyDonate пока нет ни одного товара — сначала создай их в панели.")
     print("товаров в EasyDonate: %d" % len(remote))
 
-    # индекс: (базовое имя, срок) -> id
-    index = {}
+    # индекс: (базовое имя, срок) -> (id, цена). Дубли имён не берём — иначе
+    # привяжется случайный из двух и подтянется чужая цена.
+    index, dupes = {}, {}
     for p in remote:
         b, d = base_and_dur(p.get("name"))
-        index[(b, d)] = p.get("id")
+        try:
+            price = int(round(float(p.get("price"))))
+        except (TypeError, ValueError):
+            price = None
+        key = (b, d)
+        if key in index:
+            dupes.setdefault(key, [index[key][0]]).append(p.get("id"))
+            continue
+        index[key] = (p.get("id"), price)
+
+    if dupes:
+        print("\nВ EasyDonate несколько товаров с одинаковым названием — они пропущены,")
+        print("переименуй лишние, иначе непонятно, какой привязывать:")
+        for (b, d), ids in dupes.items():
+            print("   «%s»%s — id: %s" % (b, (" [%s]" % d) if d else "", ", ".join(map(str, ids))))
+        for key in dupes:
+            index.pop(key, None)
 
     html = open(HTML, encoding="utf-8").read()
     original = html
-    linked, missed = [], []
+    linked, missed, repriced = [], [], []
 
     for sp in site_products(html):
         base = norm(sp["name"])
         if sp["variants"]:
             found = {}
             for code in ("30", "90", "forever"):
-                pid = index.get((base, code))
-                if pid:
-                    found[code] = pid
+                got = index.get((base, code))
+                if got:
+                    found[code] = got
             if len(found) == 3:
-                ed = "ed:{" + ",".join('"%s":%d' % (c, found[c]) for c in ("30", "90", "forever")) + "}"
+                ed = "ed:{" + ",".join('"%s":%d' % (c, found[c][0]) for c in ("30", "90", "forever")) + "}"
                 html = re.sub(r'(\{id:"%s",[^\n]*?)ed:\{[^}]*\}' % re.escape(sp["pid"]),
                               lambda m: m.group(1) + ed, html, count=1)
-                linked.append("%s -> %s" % (sp["name"], found))
+                linked.append("%s -> %s" % (sp["name"], {c: found[c][0] for c in found}))
+                # цены берём из кассы: игрок должен видеть ровно то, что спишется
+                if all(found[c][1] is not None for c in found):
+                    newv = 'variants:{"30":%d,"90":%d,"forever":%d}' % (
+                        found["30"][1], found["90"][1], found["forever"][1])
+                    old = re.search(r'\{id:"%s",[^\n]*?(variants:\{[^}]*\})' % re.escape(sp["pid"]), html)
+                    if old and old.group(1) != newv:
+                        html = html.replace(old.group(1), newv, 1)
+                        repriced.append("%s: %s -> %s ₽" % (sp["name"], old.group(1), newv))
             else:
                 missed.append("%s (нашлось сроков: %d из 3)" % (sp["name"], len(found)))
         else:
-            pid = index.get((base, None)) or index.get((base, "30"))
-            if pid:
+            got = index.get((base, None)) or index.get((base, "30"))
+            if got:
+                pid, price = got
                 html = re.sub(r'(\{id:"%s",[^\n]*?)edId:\s*(?:null|\d+)' % re.escape(sp["pid"]),
                               lambda m: m.group(1) + "edId:%d" % pid, html, count=1)
                 linked.append("%s -> %d" % (sp["name"], pid))
+                if price is not None:
+                    old = re.search(r'\{id:"%s",[^\n]*?price:(\d+)' % re.escape(sp["pid"]), html)
+                    if old and int(old.group(1)) != price:
+                        html = re.sub(r'(\{id:"%s",[^\n]*?)price:\d+' % re.escape(sp["pid"]),
+                                      lambda m: m.group(1) + "price:%d" % price, html, count=1)
+                        repriced.append("%s: %s -> %d ₽" % (sp["name"], old.group(1), price))
             else:
                 missed.append(sp["name"])
 
@@ -118,6 +152,11 @@ def main():
             print("   " + s)
     else:
         print("\nничего не изменилось")
+
+    if repriced:
+        print("\nцены подтянуты из кассы (%d):" % len(repriced))
+        for s in repriced:
+            print("   " + s)
 
     if missed:
         print("\nне нашлись в EasyDonate (создай их там с такими же названиями):")
