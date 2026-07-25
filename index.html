@@ -422,9 +422,8 @@ const CONFIG={
       ? "/api/pay" : "https://"+this.MAIN_HOST+"/api/pay";
   },
   // Запасной путь оплаты, если основной домен недоступен: витрина EasyDonate
-  // (российский домен). Заполнить после создания магазина, например
-  // "https://nationrise.easydonate.ru".
-  SHOP_FALLBACK_URL:"",
+  // (российский домен, доступен когда наш сайт — нет).
+  SHOP_FALLBACK_URL:"https://nationrise.easydonate.ru",
 };
 
 /* ============================================================
@@ -781,9 +780,13 @@ async function pay(){
   if(!/^\S+@\S+\.\S+$/.test(email)){showMsg("Введите корректный Email.","err");return;}
   if(!agree){showMsg("Нужно принять условия.","err");return;}
   localStorage.setItem("nr_nick",nick);localStorage.setItem("nr_email",email);
-  const products={};let missing=false;
-  keys.forEach(k=>{const e=cart[k],p=P(e.pid);let edId=p.variants?(p.ed&&p.ed[e.variant]):p.edId;if(!edId){missing=true;}else products[edId]=(products[edId]||0)+e.qty;});
+  // EasyDonate ждёт массив [{id, quantity}], не более 10 разных позиций
+  const byId={};let missing=false;
+  keys.forEach(k=>{const e=cart[k],p=P(e.pid);const edId=p.variants?(p.ed&&p.ed[e.variant]):p.edId;
+    if(!edId){missing=true;}else byId[edId]=(byId[edId]||0)+e.qty;});
   if(missing){showMsg("Оплата этих товаров ещё настраивается (не привязаны ID EasyDonate). Скоро заработает.","info");return;}
+  const products=Object.entries(byId).map(([id,quantity])=>({id:Number(id),quantity}));
+  if(products.length>10){showMsg("В одном заказе не больше 10 разных товаров. Оформи покупку в два раза.","err");return;}
   const btn=document.getElementById("payBtn");btn.disabled=true;btn.textContent="Создаём платёж…";
   try{
     const r=await fetch(CONFIG.PAY_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer:nick,email,products,coupon:document.getElementById("promo").value.trim()})});
