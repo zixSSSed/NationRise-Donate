@@ -448,6 +448,8 @@ const ICONS={
   shovel:`<path d="M6 19 13.5 11.5" ${S} stroke-width="1.9"/><path d="M14 6.5h5v5" ${S} stroke-width="1.7"/><path d="M12.6 12.9c1.4-2.4 3.6-4.2 6.4-5-0.8 2.8-2.6 5-5 6.4Z" ${S} stroke-width="1.4"/>`,
   crown:`<path d="M4 8l3.2 2.4L12 4l4.8 6.4L20 8l-1.6 10H5.6z" ${S} stroke-width="1.7"/><path d="M5.6 18h12.8" stroke="currentColor" stroke-width="1.7"/>`,
   shield:`<path d="M12 3l7 2.6v5.2c0 4.6-3 7.6-7 9.2-4-1.6-7-4.6-7-9.2V5.6z" ${S} stroke-width="1.7"/>`,
+  unlock:`<rect x="5" y="11" width="14" height="9.5" rx="1.6" ${S} stroke-width="1.7"/><path d="M8.5 11V7.6A3.5 3.5 0 0 1 15.4 7" ${S} stroke-width="1.7"/><circle cx="12" cy="15.6" r="1.5" fill="currentColor"/>`,
+  speak:`<path d="M4.5 5.5h15v10h-9l-4.5 3.5v-3.5h-1.5z" ${S} stroke-width="1.7"/><path d="M8.5 10.5h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
   chev:`<path d="M9 5l7 7-7 7" ${S} stroke-width="2"/>`,
   check:`<path d="M4.5 12.5l5 5 10-11" ${S} stroke-width="2.2"/>`
 };
@@ -462,7 +464,8 @@ function crest(color,label){const id="c"+label.length+color.replace('#','');retu
 const CATEGORIES=[
   {id:"all",name:"Всё"},{id:"priv",name:"Привилегии"},{id:"kit",name:"Наборы"},
   {id:"res",name:"Ресурсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
-  {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
+  {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"pardon",name:"Снятие наказаний"},
+  {id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
 ];
 const DURS=[{v:"30",l:"30 дней"},{v:"90",l:"90 дней"},{v:"forever",l:"Навсегда"}];
 
@@ -505,6 +508,9 @@ const PRODUCTS=[
   {id:"city_6",cat:"citylevel",icon:"castle",name:"Город → Уровень 6",price:2499,desc:"Максимальный уровень города.",edId:null},
 
   {id:"city_restore",cat:"restore",icon:"hammer",name:"Восстановление города",price:139,desc:"Вернуть разрушенный или удалённый город со всеми участками.",edId:null},
+
+  {id:"unban", cat:"pardon",icon:"unlock",name:"Разбан",price:299,desc:"Снять блокировку и вернуться на сервер.",edId:null},
+  {id:"unmute",cat:"pardon",icon:"speak", name:"Размут",price:99, desc:"Снять запрет на общение в чате.",edId:null},
 
   {id:"rise",cat:"rise",icon:"coin",name:"Райзики",custom:true,desc:"Донат-валюта. 1 райзик = 1 ₽. Введи нужное количество.",edId:null},
 
@@ -597,9 +603,9 @@ const DETAILS={
   kit_hunter:{sub:"Всё для охоты",perks:["Лук: Сила III, Прочность III","Запас стрел","Зелья и провизия"]},
   kit_alchemist:{sub:"Всё для зельеварения",perks:["Варочная стойка","Ингредиенты для зелий","Готовые зелья"]},
 
-  prom_pickaxe:{sub:"Топовая кирка сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
-  prom_axe:{sub:"Топовый топор сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
-  prom_shovel:{sub:"Топовая лопата сервера",perks:["Эффективность X — максимум на сервере","Прочность III","Починка"]},
+  prom_pickaxe:{sub:"Топовая кирка сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
+  prom_axe:{sub:"Топовый топор сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
+  prom_shovel:{sub:"Топовая лопата сервера",perks:["Эффективность X — максимум на сервере","Прочность V","Ломается крайне медленно","Особая модель из ресурспака"]},
 
   city_2:{sub:"Второй уровень города",perks:[
     "§+8§ чанков к лимиту застройки города",
@@ -625,6 +631,15 @@ const DETAILS={
     "Особая иконка города на карте мира",
     "Не нужно собирать ресурсы и ждать — уровень выдаётся сразу"]},
 
+  unban:{sub:"Снятие блокировки",perks:[
+    "Блокировка снимается сразу после оплаты",
+    "Заходить можно тем же аккаунтом",
+    "Прогресс, город и вещи остаются на месте",
+    "§Не действует§ на баны за читы, если было отрицание вины"]},
+  unmute:{sub:"Снятие запрета на чат",perks:[
+    "Мут снимается сразу после оплаты",
+    "Возвращается доступ ко всем чатам сервера"]},
+
   city_restore:{sub:"Возврат потерянного города",perks:["Город восстанавливается со всеми участками","Возвращаются постройки и уровень","Казна и склад города остаются вашими"]},
   rise:{sub:"Донат-валюта сервера",perks:["1 райзик = 1 ₽","Тратится во внутриигровом магазине","Спавнеры, чары и предметы за райзики"]},
 };
@@ -647,7 +662,8 @@ function setCat(c){activeCat=c;renderTabs();renderGrid();}
 
 const RANK_STYLE={1:['#c07a3e','I'],2:['#9aa7b8','II'],3:['#e0a93c','III'],4:['#57b894','IV'],5:['#4f9de0','V'],6:['#a06ae0','VI'],7:['#e05a7a','★']};
 const KIT_ICON={kit_builder:['bricks','#e0954a'],kit_farmer:['wheat','#6cc06a'],kit_miner:['pickaxe','#aab4c3'],kit_fisher:['rod','#4fb8d8'],kit_pvp:['sword','#e0655a'],kit_hunter:['bow','#e0b64a'],kit_alchemist:['flask','#b06ae0']};
-const CAT_TINT={res:'#7fd0e0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',rise:'#f2cf7a',coins:'#d9c27a'};
+const CAT_TINT={res:'#7fd0e0',spawner:'#8fd06a',prometheus:'#e0954a',citylevel:'#e0a93c',restore:'#e0954a',
+  pardon:'#6cc0a0',rise:'#f2cf7a',coins:'#d9c27a'};
 /* Иконка товара: сначала пробуем картинку img/<id>.png (просто положи файл — код править не нужно),
    если её нет — красиво падаем на векторную заглушку. */
 function fallbackArt(p){
