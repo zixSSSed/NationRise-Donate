@@ -127,7 +127,10 @@ nav.menu a:hover{color:var(--text);background:var(--panel-tint)}
 .card:hover{transform:translateY(-5px);border-color:var(--line);box-shadow:var(--shadow)}
 .card .art{height:140px;position:relative;display:grid;place-items:center;overflow:hidden}
 /* картинка товара лежит поверх заглушки и проявляется только когда реально загрузилась */
-.card .art img.pix{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10px;
+/* 128 = 512/4: целое деление, поэтому пиксель-арт остаётся чётким.
+   При нецелом масштабе режим pixelated рвёт картинку в кашу. */
+.card .art img.pix{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:128px;height:128px;object-fit:contain;
   opacity:0;transition:opacity .2s;image-rendering:pixelated;image-rendering:crisp-edges;z-index:1}
 .card .art img.pix.ok{opacity:1}
 .card .art .fb{display:grid;place-items:center}
@@ -227,7 +230,9 @@ footer a{color:var(--muted)}footer a:hover{color:var(--gold-soft)}
   background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 70%);border-radius:18px}
 .dt-art .box .glyph{width:96px;height:96px}
 .dt-art .box .crest{width:110px;height:120px}
-.dt-art .box img.pix{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12px;
+/* в окне товара — те же 128 = 512/4 (бокс 150px, влезает с отступом) */
+.dt-art .box img.pix{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:128px;height:128px;object-fit:contain;
   image-rendering:pixelated;image-rendering:crisp-edges;opacity:0;transition:opacity .2s}
 .dt-art .box img.pix.ok{opacity:1}
 .dt-price{font-size:30px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums}
