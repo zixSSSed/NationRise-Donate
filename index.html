@@ -480,13 +480,13 @@ const DURS=[{v:"30",l:"30 дней"},{v:"90",l:"90 дней"},{v:"forever",l:"Н
 
 // Ранги по порядку (Дворянин → … → Custom). Цены-заглушки — потом подкорректируем.
 const PRODUCTS=[
-  {id:"nobleman",cat:"priv",icon:"crown",name:"Дворянин",tier:1,desc:"Префикс в чате, свой ранговый набор, наборы строителя и фермера.",variants:{"30":79,"90":179,"forever":249},ed:{"30":1106893,"90":1106894,"forever":1106895}},
-  {id:"prince",  cat:"priv",icon:"crown",name:"Принц",   tier:2,desc:"Наборы шахтёра и рыбака, +1 слот на аукционе, команда /afk.",variants:{"30":129,"90":289,"forever":399},ed:{"30":1106896,"90":1106897,"forever":1106898}},
-  {id:"elite",   cat:"priv",icon:"crown",name:"Элита",   tier:3,desc:"Набор бойца, +2 слота на аукционе, команды /feed и /clear.",variants:{"30":219,"90":479,"forever":699},ed:{"30":1106899,"90":1106900,"forever":1106901}},
-  {id:"king",    cat:"priv",icon:"crown",name:"Король",  tier:4,desc:"Первые 2 точки дома, эндер-сундук /ec, набор охотника, +5 слотов.",variants:{"30":349,"90":749,"forever":1099},ed:{"30":1106902,"90":1106903,"forever":1106904}},
-  {id:"archont", cat:"priv",icon:"crown",name:"Архонт",  tier:5,desc:"Полёт в своём городе, все 7 наборов профессий, 5 домов, чат без задержки.",variants:{"30":599,"90":1299,"forever":1899},ed:{"30":1106905,"90":1106906,"forever":1106907}},
-  {id:"oktavian",cat:"priv",icon:"crown",name:"Октавиан",tier:6,hot:true,desc:"Полёт в землях нации, рюкзак на 45 слотов, 10 домов, −20% на постройки.",variants:{"30":1249,"90":2699,"forever":3699},ed:{"30":1106908,"90":1106909,"forever":1106910}},
-  {id:"custom",  cat:"priv",icon:"crown",name:"Custom",  tier:7,desc:"Своя привилегия: название на выбор, 15 домов, 30 слотов аукциона, бесплатный разбан.",variants:{"30":1699,"90":3199,"forever":4199},ed:{"30":1106911,"90":1106912,"forever":1106913}},
+  {id:"nobleman",cat:"priv",icon:"crown",name:"Дворянин",tier:1,desc:"Префикс в чате, свой ранговый набор, наборы строителя и фермера.",variants:{"30":59,"90":139,"forever":189},ed:{"30":1106893,"90":1106894,"forever":1106895}},
+  {id:"prince",  cat:"priv",icon:"crown",name:"Принц",   tier:2,desc:"Наборы шахтёра и рыбака, +1 слот на аукционе, команда /afk.",variants:{"30":119,"90":269,"forever":369},ed:{"30":1106896,"90":1106897,"forever":1106898}},
+  {id:"elite",   cat:"priv",icon:"crown",name:"Элита",   tier:3,desc:"Набор бойца, +2 слота на аукционе, команды /feed и /clear.",variants:{"30":199,"90":439,"forever":639},ed:{"30":1106899,"90":1106900,"forever":1106901}},
+  {id:"king",    cat:"priv",icon:"crown",name:"Король",  tier:4,desc:"Первые 2 точки дома, эндер-сундук /ec, набор охотника, +5 слотов.",variants:{"30":319,"90":689,"forever":999},ed:{"30":1106902,"90":1106903,"forever":1106904}},
+  {id:"archont", cat:"priv",icon:"crown",name:"Архонт",  tier:5,desc:"Полёт в своём городе, все 7 наборов профессий, 5 домов, чат без задержки.",variants:{"30":549,"90":1199,"forever":1749},ed:{"30":1106905,"90":1106906,"forever":1106907}},
+  {id:"oktavian",cat:"priv",icon:"crown",name:"Октавиан",tier:6,hot:true,desc:"Полёт в землях нации, рюкзак на 45 слотов, 10 домов, −20% на постройки.",variants:{"30":1149,"90":2499,"forever":3399},ed:{"30":1106908,"90":1106909,"forever":1106910}},
+  {id:"custom",  cat:"priv",icon:"crown",name:"Custom",  tier:7,desc:"Своя привилегия: название на выбор, 15 домов, 30 слотов аукциона, бесплатный разбан.",variants:{"30":1599,"90":2999,"forever":3899},ed:{"30":1106911,"90":1106912,"forever":1106913}},
 
   {id:"kit_builder",  cat:"kit",icon:"shield",name:"Набор строителя",  price:89,desc:"Блоки, инструменты Efficiency, леса, еда.",edId:1106914},
   {id:"kit_farmer",   cat:"kit",icon:"shield",name:"Набор фермера",    price:89,desc:"Семена, костная мука, тяпка Fortune, вёдра.",edId:1106915},
@@ -495,13 +495,10 @@ const PRODUCTS=[
   {id:"kit_pvp",      cat:"kit",icon:"shield",name:"Набор бойца",      price:89,desc:"Зачарованный меч, щит, лук, зелья.",edId:1106918},
   {id:"kit_hunter",   cat:"kit",icon:"shield",name:"Набор охотника",   price:89,desc:"Лук Power, стрелы, зелья, припасы.",edId:1106919},
   {id:"kit_alchemist",cat:"kit",icon:"shield",name:"Набор алхимика",   price:89,desc:"Варочная стойка, ингредиенты, зелья.",edId:1106920},
-
-
-  {id:"crate_all",      cat:"crate",icon:"crate",name:"Кейс NationRise",   price:199,hot:true,desc:"Всё сразу: привилегии, райзики, монеты и предметы.",edId:1107059},
-  {id:"crate_privilege",cat:"crate",icon:"crate",name:"Кейс Привилегий",  price:299,desc:"Шанс выбить донат-привилегию.",edId:1107060},
-  {id:"crate_crystal",  cat:"crate",icon:"crate",name:"Кейс Райзиков",    price:149,desc:"Донат-валюта случайной суммой.",edId:1107061},
-  {id:"crate_money",    cat:"crate",icon:"crate",name:"Кейс Монет",       price:119,desc:"Игровые монеты случайной суммой.",edId:1107062},
-  {id:"crate_item",     cat:"crate",icon:"crate",name:"Кейс Предметов",   price:89, desc:"Ресурсы и полезные вещи для старта.",edId:1107063},
+  {id:"crate_privilege",cat:"crate",icon:"crate",name:"Кейс Привилегий",  price:130,desc:"Шанс выбить донат-привилегию.",edId:1107060},
+  {id:"crate_crystal",  cat:"crate",icon:"crate",name:"Кейс Райзиков",    price:99,desc:"Донат-валюта случайной суммой.",edId:1107061},
+  {id:"crate_money",    cat:"crate",icon:"crate",name:"Кейс Монет",       price:79,desc:"Игровые монеты случайной суммой.",edId:1107062},
+  {id:"crate_item",     cat:"crate",icon:"crate",name:"Кейс Предметов",   price:59, desc:"Ресурсы и полезные вещи для старта.",edId:1107063},
 
   {id:"spawner_zombie",  cat:"spawner",icon:"cage",name:"Спавнер зомби",  price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106921},
   {id:"spawner_skeleton",cat:"spawner",icon:"cage",name:"Спавнер скелета",price:199,desc:"Ставится в твоём городе. Также в игре за райзики.",edId:1106922},
@@ -528,6 +525,10 @@ const PRODUCTS=[
   {id:"skin_nekmeng", cat:"minion",icon:"skin",name:"Скин миньона NekMeng", price:59,desc:"Токен скина — можно надеть или продать.",edId:1107048},
   {id:"skin_minion",  cat:"minion",icon:"skin",name:"Скин миньона Миньон",  price:59,desc:"Токен скина — можно надеть или продать.",edId:1107049},
   {id:"skin_pudge",   cat:"minion",icon:"skin",name:"Скин миньона Pudge",   price:59,desc:"Токен скина — можно надеть или продать.",edId:1107050},
+    {id:"skin_cure",    cat:"minion",icon:"skin",name:"Скин миньона cure",    price:59,desc:"Токен скина — можно надеть или продать.",edId:null},
+    {id:"skin_kub1ik",  cat:"minion",icon:"skin",name:"Скин миньона Kub1iK",  price:59,desc:"Токен скина — можно надеть или продать.",edId:null},
+    {id:"skin_pepe",    cat:"minion",icon:"skin",name:"Скин миньона pepe",    price:59,desc:"Токен скина — можно надеть или продать.",edId:null},
+    {id:"skin_xx4xx",   cat:"minion",icon:"skin",name:"Скин миньона Xx4xX",   price:59,desc:"Токен скина — можно надеть или продать.",edId:null},
 
   {id:"unban", cat:"pardon",icon:"unlock",name:"Разбан",price:189,desc:"Снять блокировку и вернуться на сервер.",edId:1106935},
   {id:"unmute",cat:"pardon",icon:"speak", name:"Размут",price:99, desc:"Снять запрет на общение в чате.",edId:1106936},
@@ -650,11 +651,6 @@ const DETAILS={
     "§+40§ чанков к лимиту застройки города — предел сервера",
     "Особая иконка города на карте мира",
     "Не нужно собирать ресурсы и ждать — уровень выдаётся сразу"]},
-
-  crate_all:{sub:"Главный кейс сервера",perks:[
-    "Внутри может выпасть §что угодно§: привилегия, райзики, монеты или предметы",
-    "Открывается у стойки кейсов на спавне",
-    "Ключ приходит на аккаунт сразу после оплаты"]},
   crate_privilege:{sub:"Кейс с донат-рангами",perks:[
     "Шанс выбить любую привилегию — вплоть до §Октавиана§",
     "Чем выше ранг, тем реже он выпадает",
