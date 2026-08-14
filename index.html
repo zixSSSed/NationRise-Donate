@@ -421,7 +421,11 @@ const LOGO=`<svg class="logo" viewBox="0 0 1400 1400" fill="currentColor"><path 
    ============================================================ */
 const CONFIG={
   IP:"mc.nationrise.space",
-  STATUS_API:"https://api.mcstatus.io/v2/status/java/185.9.145.108:32292",  // прокси NationProxy; когда заработают SRV-записи — вернуть mc.nationrise.ru
+  // Спрашиваем ИГРОВОЙ адрес, а не бэкенд напрямую. Прямой пинг в 185.9.145.108:32292 идёт
+  // мимо MineGuard, и фильтр отвечает на него сам — нулями (проверено: по IP 0/150, по домену 5/150).
+  // Из-за этого на сайте всегда висел почти пустой сервер, а когда фильтр глушил пинг совсем —
+  // «статус недоступен».
+  STATUS_API:"https://api.mcstatus.io/v2/status/java/mc.nationrise.space",
   // Основная площадка (Cloudflare Pages) — там живёт серверная функция оплаты.
   MAIN_HOST:"nationrise.space",
   // Зеркало на GitHub Pages статично, поэтому оплату оно запрашивает у основного домена.
@@ -870,16 +874,30 @@ async function pay(){
 let statusData=null;
 function paintStatus(){
   const el=document.getElementById("status"),t=document.getElementById("statusText"),narrow=innerWidth<=560;
-  if(statusData===null){el.className="status off";t.textContent=narrow?"нет связи":"статус недоступен";return;}
+  // Пока не дозвонились — нейтральное «проверяем», а не красный «недоступен»: гость
+  // читает его как «сервер сломан», хотя сломан в этот момент только опрос статуса.
+  if(statusData===null){el.className="status";t.textContent=narrow?"проверяем…":"проверяем статус…";return;}
   if(statusData.online){el.className="status on";
     t.innerHTML=`<b>${statusData.on}</b>${narrow?"/":" / "}${statusData.max}${narrow?"":" онлайн"}`;}
   else{el.className="status off";t.textContent=narrow?"офлайн":"сервер оффлайн";}
 }
+/* Одна неудачная попытка — не повод пугать гостя: mcstatus.io иногда режет по лимиту
+   запросов. Пробуем второй раз, и только потом сдаёмся; при этом уже показанное число
+   не стираем — лучше чуть устаревший онлайн, чем «статус недоступен» на витрине. */
 async function loadStatus(){
-  try{const r=await fetch(CONFIG.STATUS_API);const d=await r.json();
-    statusData=d&&d.online?{online:true,on:d.players.online,max:d.players.max}:{online:false};
-  }catch(e){statusData=null;}
-  paintStatus();
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const r=await fetch(CONFIG.STATUS_API);
+      if(!r.ok) throw new Error(r.status);
+      const d=await r.json();
+      statusData=d&&d.online?{online:true,on:d.players.online,max:d.players.max}:{online:false};
+      paintStatus();
+      return;
+    }catch(e){
+      if(attempt===0){ await new Promise(s=>setTimeout(s,1500)); continue; }
+      if(statusData===null) paintStatus();   // совсем нечего показать — оставляем как есть
+    }
+  }
 }
 addEventListener("resize",paintStatus);
 
