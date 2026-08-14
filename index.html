@@ -465,6 +465,7 @@ const ICONS={
   bot:`<rect x="5" y="8" width="14" height="11" rx="2.4" ${S} stroke-width="1.7"/><path d="M12 8V4.5M9.5 3.2h5" ${S} stroke-width="1.6"/><circle cx="9.3" cy="12.6" r="1.3" fill="currentColor"/><circle cx="14.7" cy="12.6" r="1.3" fill="currentColor"/><path d="M9.5 16.2h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
   skin:`<path d="M8 4.5h8l1.5 4-2.5 1v10H9v-10l-2.5-1z" ${S} stroke-width="1.7"/><path d="M9.8 9.6h4.4" stroke="currentColor" stroke-width="1.4"/>`,
   crate:`<path d="M4 9.5h16v9.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" ${S} stroke-width="1.7"/><path d="M4 9.5 6 5h12l2 4.5" ${S} stroke-width="1.7"/><path d="M12 5v4.5M4 13.5h16" stroke="currentColor" stroke-width="1.4"/><rect x="10.4" y="12" width="3.2" height="3.6" rx=".6" fill="currentColor"/>`,
+  wing:`<path d="M4.8 19.2C4.8 11.6 9.9 5.9 18.6 4.4c-.5 4.4-1.7 7.8-3.5 10.3" ${S} stroke-width="1.7"/><path d="M4.8 19.2c5.2.5 9.2-.9 12-4.1" ${S} stroke-width="1.7"/><path d="M8.3 15.9c1.8-3.2 4.3-5.6 7.4-7.1" stroke="currentColor" stroke-width="1.3"/>`,
   chev:`<path d="M9 5l7 7-7 7" ${S} stroke-width="2"/>`,
   check:`<path d="M4.5 12.5l5 5 10-11" ${S} stroke-width="2.2"/>`
 };
@@ -480,6 +481,7 @@ const CATEGORIES=[
   {id:"all",name:"Всё"},{id:"priv",name:"Привилегии"},{id:"kit",name:"Наборы"},
   {id:"crate",name:"Кейсы"},{id:"spawner",name:"Спавнеры"},{id:"prometheus",name:"Прометей"},
   {id:"minion",name:"Миньоны"},
+  {id:"perk",name:"Возможности"},
   {id:"citylevel",name:"Уровни города"},{id:"restore",name:"Восстановление"},{id:"pardon",name:"Снятие наказаний"},
   {id:"rise",name:"Райзики"},{id:"coins",name:"Монеты"},
 ];
@@ -537,6 +539,8 @@ const PRODUCTS=[
     {id:"skin_pepe",    cat:"minion",icon:"skin",name:"Скин миньона pepe",    price:69,desc:"Токен скина — можно надеть или продать.",edId:1108278},
     {id:"skin_xx4xx",   cat:"minion",icon:"skin",name:"Скин миньона Xx4xX",   price:69,desc:"Токен скина — можно надеть или продать.",edId:1108279},
     {id:"skin_lettyrxzx",cat:"minion",icon:"skin",name:"Скин миньона LettyRxzx",price:69,desc:"Токен скина — можно надеть или продать.",edId:1108280},
+
+  {id:"tfly",cat:"perk",icon:"wing",name:"Полёт в своём городе",price:200,badge:"30 дней",desc:"Команда /t fly на месяц, без покупки Архонта.",edId:null},
 
   {id:"unban", cat:"pardon",icon:"unlock",name:"Разбан",price:189,desc:"Снять блокировку и вернуться на сервер.",edId:1106935},
   {id:"unmute",cat:"pardon",icon:"speak", name:"Размут",price:99, desc:"Снять запрет на общение в чате.",edId:1106936},
@@ -687,6 +691,13 @@ const DETAILS={
   unmute:{sub:"Снятие запрета на чат",perks:[
     "Мут снимается сразу после оплаты",
     "Возвращается доступ ко всем чатам сервера"]},
+
+  tfly:{sub:"Полёт на своей земле, 30 дней",perks:[
+    "Команда §/t fly§ — полёт по чанкам своего города",
+    "Работает §30 дней§ с момента покупки, продление складывается с остатком",
+    "Отключается в бою и за границей города — как у Архонта",
+    "Нужен свой город: без него команде негде работать",
+    "У §Архонта§ этот полёт уже есть — покупать отдельно не нужно"]},
 
   city_restore:{sub:"Возврат потерянного города",perks:["Город восстанавливается со всеми участками","Возвращаются постройки и уровень","Казна и склад города остаются вашими"]},
   rise:{sub:"Донат-валюта сервера",perks:["1 райзик = 1 ₽","Тратится во внутриигровом магазине","Спавнеры, чары и предметы за райзики"]},
