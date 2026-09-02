@@ -16,27 +16,27 @@
 
 | Название товара | Цена ₽ | Команда выдачи |
 |---|---|---|
-| Дворянин [30 дней] | 79 | `kmrank set {user} noble 30` |
-| Дворянин [90 дней] | 179 | `kmrank set {user} noble 90` |
-| Дворянин [навсегда] | 249 | `kmrank set {user} noble` |
-| Принц [30 дней] | 129 | `kmrank set {user} prince 30` |
-| Принц [90 дней] | 289 | `kmrank set {user} prince 90` |
-| Принц [навсегда] | 399 | `kmrank set {user} prince` |
-| Элита [30 дней] | 219 | `kmrank set {user} elite 30` |
-| Элита [90 дней] | 479 | `kmrank set {user} elite 90` |
-| Элита [навсегда] | 699 | `kmrank set {user} elite` |
-| Король [30 дней] | 349 | `kmrank set {user} king 30` |
-| Король [90 дней] | 749 | `kmrank set {user} king 90` |
-| Король [навсегда] | 1099 | `kmrank set {user} king` |
-| Архонт [30 дней] | 599 | `kmrank set {user} archon 30` |
-| Архонт [90 дней] | 1299 | `kmrank set {user} archon 90` |
-| Архонт [навсегда] | 1899 | `kmrank set {user} archon` |
-| Октавиан [30 дней] | 1249 | `kmrank set {user} octavian 30` |
-| Октавиан [90 дней] | 2699 | `kmrank set {user} octavian 90` |
-| Октавиан [навсегда] | 3699 | `kmrank set {user} octavian` |
-| Custom [30 дней] | 1699 | `kmrank set {user} custom 30` |
-| Custom [90 дней] | 3199 | `kmrank set {user} custom 90` |
-| Custom [навсегда] | 4199 | `kmrank set {user} custom` |
+| Дворянин [30 дней] | 59 | `kmrank set {user} noble 30` |
+| Дворянин [90 дней] | 139 | `kmrank set {user} noble 90` |
+| Дворянин [навсегда] | 189 | `kmrank set {user} noble` |
+| Принц [30 дней] | 119 | `kmrank set {user} prince 30` |
+| Принц [90 дней] | 269 | `kmrank set {user} prince 90` |
+| Принц [навсегда] | 369 | `kmrank set {user} prince` |
+| Элита [30 дней] | 199 | `kmrank set {user} elite 30` |
+| Элита [90 дней] | 439 | `kmrank set {user} elite 90` |
+| Элита [навсегда] | 639 | `kmrank set {user} elite` |
+| Король [30 дней] | 319 | `kmrank set {user} king 30` |
+| Король [90 дней] | 689 | `kmrank set {user} king 90` |
+| Король [навсегда] | 999 | `kmrank set {user} king` |
+| Архонт [30 дней] | 549 | `kmrank set {user} archon 30` |
+| Архонт [90 дней] | 1199 | `kmrank set {user} archon 90` |
+| Архонт [навсегда] | 1749 | `kmrank set {user} archon` |
+| Октавиан [30 дней] | 1149 | `kmrank set {user} octavian 30` |
+| Октавиан [90 дней] | 2499 | `kmrank set {user} octavian 90` |
+| Октавиан [навсегда] | 3399 | `kmrank set {user} octavian` |
+| Custom [30 дней] | 1599 | `kmrank set {user} custom 30` |
+| Custom [90 дней] | 2999 | `kmrank set {user} custom 90` |
+| Custom [навсегда] | 3899 | `kmrank set {user} custom` |
 
 ## Возможности (отдельно от ранга)
 
@@ -68,6 +68,38 @@
 | Набор алмазов | 149 | `nrgive item {user} DIAMOND 32` |
 | Набор незерита | 399 | `nrgive item {user} NETHERITE_INGOT 8` |
 
+## Кейсы
+
+Ключи цифровые и выдаются **даже офлайн** — в очередь не встают.
+Внимание на порядок аргументов: сначала тип кейса, потом ник.
+
+| Название товара | Цена ₽ | Команда выдачи |
+|---|---|---|
+| Кейс Привилегий | 130 | `kmcrate key privilege {user} 1` |
+| Кейс Райзиков | 99 | `kmcrate key crystal {user} 1` |
+| Кейс Монет | 79 | `kmcrate key money {user} 1` |
+| Кейс Предметов | 59 | `kmcrate key item {user} 1` |
+| Кейс Титулов | 69 | `kmcrate key title {user} 1` |
+| Кейс Винокура | 89 | `kmcrate key brew {user} 1` |
+
+### Паки кейсов
+
+Та же команда, только количество больше. Цена — минус 10 % за пятёрку и минус 20 % за десятку.
+
+| Название товара | Цена ₽ | Команда выдачи |
+|---|---|---|
+| Кейс Привилегий ×5 | 585 | `kmcrate key privilege {user} 5` |
+| Кейс Привилегий ×10 | 1040 | `kmcrate key privilege {user} 10` |
+| Кейс Райзиков ×5 | 445 | `kmcrate key crystal {user} 5` |
+| Кейс Райзиков ×10 | 790 | `kmcrate key crystal {user} 10` |
+| Кейс Монет ×5 | 355 | `kmcrate key money {user} 5` |
+| Кейс Монет ×10 | 630 | `kmcrate key money {user} 10` |
+| Кейс Предметов ×5 | 265 | `kmcrate key item {user} 5` |
+| Кейс Предметов ×10 | 470 | `kmcrate key item {user} 10` |
+
+**Единый «Кейс NationRise» (`all`) продавать нельзя** — `kmcrate key all` намеренно
+отвечает отказом, он выдаётся только на месте.
+
 ## Спавнеры
 
 | Название товара | Цена ₽ | Команда выдачи |
@@ -76,7 +108,7 @@
 | Спавнер скелета | 199 | `nrgive item {user} SPAWNER_SKELETON` |
 | Спавнер крипера | 249 | `nrgive item {user} SPAWNER_CREEPER` |
 | Спавнер ифрита | 349 | `nrgive item {user} SPAWNER_BLAZE` |
-| Спавнер голема | 449 | `nrgive item {user} SPAWNER_IRON_GOLEM` |
+| Спавнер голема | 349 | `nrgive item {user} SPAWNER_IRON_GOLEM` |
 
 ## Инструменты Прометея
 
@@ -106,7 +138,7 @@
 
 | Название товара | Цена ₽ | Команда выдачи |
 |---|---|---|
-| Разбан | 299 | `unban {user}` |
+| Разбан | 189 | `unban {user}` |
 | Размут | 99 | `unmute {user}` |
 
 ## Райзики
